@@ -22,7 +22,7 @@ if node['linux_patch']['apply_patch']
               end
 
 bash 'installing patches on system' do
-    hef::Log.info("Linux Patching")
+   code <<-EOC
     #yum update process not running
     if [[ $(ps -ef | grep "; yum update" | grep -cv grep) == 0 ]]; then
       #{update_cmd}
