@@ -14,16 +14,13 @@ if node['linux_patch']['apply_patch']
   exclude_packages = node['linux_patch']['exclude_packages'] 
 
   update_cmd = if exclude_packages.nil?
-                 Chef::Log.info(" Excluding Packages nil , Updating all ")
                  'yum update -y'
                elsif exclude_packages.empty?
-                 Chef::Log.info(" Excluding Packages Empty , Updating all ")
                  'yum update -y'
                else
-                 Chef::Log.info(" Excluding Packages are #{exclude_packages}, Skipping #{exclude_packages}  ")
-                  'yum --exclude=java* --exclude=shib* --exclude=httpd* --exclude=jboss* --exclude=php* --exclude=tomcat* update -y'
-              
-		end
+                 "yum --exclude=#{exclude_packages} update -y"
+              end
+
 bash 'installing patches on system' do
     hef::Log.info("Linux Patching")
     #yum update process not running
