@@ -26,6 +26,8 @@ bash 'installing patches on system' do
     #yum update process not running
     if [[ $(ps -ef | grep "; yum update" | grep -cv grep) == 0 ]]; then
       #{update_cmd}
+      yum install yum-utils  -y
+      package-cleanup --oldkernels --count=1
     fi
     EOC
   end 
