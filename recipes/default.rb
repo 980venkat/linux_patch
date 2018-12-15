@@ -1,37 +1,32 @@
 #
 # Cookbook:: linux_patch
-# Recipe:: default
+# Recipe:: patch_now
 #
 # Copyright:: 2018, The Authors, All Rights Reserved.
 
-Chef::Log.info("Linux Patching")
-Chef::Log.info("apply patch variable -- #{node['linux_patch']['apply_patch']}")
-Chef::Log.info("exclude package variable -- #{node['linux_patch']['exclude_packages']}")
+begin
+  tag_method = method(:tag)
 
+  if tagged?('do_not_patch')
+    log 'This node has the do_not_patch tag in Chef, skipping all patching as instructed...'
+    return
+  end
 
-if node['linux_patch']['apply_patch']
-  Chef::Log.info(" Updated falg is #{node['linux_patch']['apply_patch']} , Patching System.  ")
-  exclude_packages = node['linux_patch']['exclude_packages'] 
-
-  update_cmd = if exclude_packages.nil?
-                 'yum update -y'
-               elsif exclude_packages.empty?
-                 'yum update -y'
-               else
-                 "yum --exclude=#{exclude_packages} update -y"
-              end
-
-bash 'installing patches on system' do
-   code <<-EOC
-    #yum update process not running
-    if [[ $(ps -ef | grep "; yum update" | grep -cv grep) == 0 ]]; then
-      #{update_cmd}
-      yum install yum-utils  -y
-      package-cleanup --oldkernels --count=1
-    fi
-    EOC
-  end 
-else
-   Chef::Log.info(" Updated flag is #{node['linux_patch']['apply_patch']} , Skiping patches..  ")
+  # if chef tag patch_now exists, invoke immediate patching...
+  if tagged?('patch_now')
+    include_recipe 'linux_patch::patch_now'
+  end
+  
+  ruby_block 'add tag do_not_patch' do
+      block do
+        tag_method.call 'do_not_patch'
+        node.save
+      end
+  end
+  
+rescue Exception => e
+  log e.message
+  log e.backtrace
+  log 'An error occured inpatching'
+  return
 end
-Chef::Log.info(" Ending linux patching ")
