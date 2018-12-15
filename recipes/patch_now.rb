@@ -31,6 +31,12 @@ bash 'installing patches on system' do
     fi
     EOC
   end 
+
+reboot 'reboot_after_patch_update' do
+    action :request_reboot
+    reason 'A kernel security update requires a reboot'
+end
+
 else
    Chef::Log.info(" Updated flag is #{node['linux_patch']['apply_patch']} , Skiping patches..  ")
 end
