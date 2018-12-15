@@ -17,6 +17,13 @@ begin
     include_recipe 'linux_patch::patch_now'
   end
   
+  ruby_block 'add tag do_not_patch' do
+      block do
+        tag_method.call 'do_not_patch'
+        node.save
+      end
+  end
+  
 rescue Exception => e
   log e.message
   log e.backtrace
